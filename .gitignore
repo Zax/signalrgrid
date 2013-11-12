@@ -13,3 +13,6 @@
 # databases
 *.mdf
 *.ldf
+
+# NuGet
+packages/
