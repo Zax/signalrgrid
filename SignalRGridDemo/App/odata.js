@@ -7,6 +7,7 @@
 			'query': { method: 'GET', isArray: false },
 			'get': { method: 'GET' },
 			'post': { method: 'POST' },
+			'remove': { method: 'DELETE', url: url + '(:id)' },
 			'patch': { method: 'PATCH', url: url + '(:id)' }
 		}
 		if (actions) for (var i in actions) oDataActions[i] = actions[i];

@@ -24,39 +24,45 @@
 
 	//Hub setup
 	var hub = new Hub('employee', {
-		'newConnection': function (id) {
-			Employees.connected.push(id);
-			$rootScope.$apply();
+		listeners: {
+			'newConnection': function (id) {
+				Employees.connected.push(id);
+				$rootScope.$apply();
+			},
+			'removeConnection': function (id) {
+				Employees.connected.splice(Employees.connected.indexOf(id), 1);
+				$rootScope.$apply();
+			},
+			'lockEmployee': function (id) {
+				var employee = find(id);
+				employee.Locked = true;
+				$rootScope.$apply();
+			},
+			'unlockEmployee': function (id) {
+				var employee = find(id);
+				employee.Locked = false;
+				$rootScope.$apply();
+			},
+			'updatedEmployee': function (id, key, value) {
+				var employee = find(id);
+				employee[key] = value;
+				$rootScope.$apply();
+			},
+			'addEmployee': function (employee) {
+				Employees.all.push(new Employee(employee));
+				$rootScope.$apply();
+			},
+			'removeEmployee': function (id) {
+				var employee = find(id);
+				Employees.all.splice(Employees.all.indexOf(employee), 1);
+				$rootScope.$apply();
+			}
 		},
-		'removeConnection': function(id){
-			Employees.connected.splice(Employees.connected.indexOf(id), 1);
-			$rootScope.$apply();
-		},
-		'lockEmployee': function (id) {
-			var employee = find(id);
-			employee.Locked = true;
-			$rootScope.$apply();
-		},
-		'unlockEmployee': function (id) {
-			var employee = find(id);
-			employee.Locked = false;
-			$rootScope.$apply();
-		},
-		'updatedEmployee': function (id, key, value) {
-			var employee = find(id);
-			employee[key] = value;
-			$rootScope.$apply();
-		},
-		'addEmployee': function (employee) {
-			Employees.all.push(new Employee(employee));
-			$rootScope.$apply();
-		},
-		'removeEmployee': function (id) {
-			var employee = find(id);
-			Employees.all.splice(Employees.all.indexOf(employee), 1);
-			$rootScope.$apply();
+		methods: ['lock', 'unlock'],
+		errorHandler: function (error) {
+			console.error(error);
 		}
-	}, ['lock', 'unlock']);
+	});
 
 	//Web API setup
 	var webApi = OData('/odata/Employees', { id: '@Id' });
@@ -83,7 +89,7 @@
 		hub.lock(employee.Id);
 	}
 	Employees.delete = function (employee) {
-		webApi.remove(employee.Id);
+		webApi.remove({ id: employee.Id });
 	}
 	Employees.patch = function (employee, key) {
 		var payload = {};
